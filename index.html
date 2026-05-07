@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Конструктор корпоративного обучающего портала</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #fafaf7;
+    --muted: #6b6b66;
+    --line: #e5e5df;
+    --accent: #ff5b2b;
+    --accent-soft: #ffe9df;
+    --gold: #c9a961;
+    --panel: #111111;
+    --panel-soft: #1a1a1a;
+    --panel-line: #262626;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .font-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* === EDITOR PANEL === */
+  .editor-panel {
+    background: var(--panel);
+    color: #f5f5f0;
+    border-right: 1px solid var(--panel-line);
+  }
+  .editor-panel input,
+  .editor-panel textarea,
+  .editor-panel select {
+    background: var(--panel-soft);
+    border: 1px solid var(--panel-line);
+    color: #f5f5f0;
+    transition: all .2s ease;
+    font-family: 'Manrope', sans-serif;
+  }
+  .editor-panel input:focus,
+  .editor-panel textarea:focus,
+  .editor-panel select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #0d0d0d;
+  }
+  .editor-panel input::placeholder,
+  .editor-panel textarea::placeholder {
+    color: #555;
+    font-style: italic;
+  }
+  .editor-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8a8a82;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .editor-section {
+    border-bottom: 1px solid var(--panel-line);
+    padding: 24px 28px;
+  }
+  .editor-section:last-child { border-bottom: none; }
+
+  .role-block {
+    background: var(--panel-soft);
+    border: 1px solid var(--panel-line);
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 12px;
+    position: relative;
+  }
+  .course-block {
+    background: #0d0d0d;
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 10px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 999px;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: #e54a1c; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px dashed #3a3a3a;
+    color: #c5c5b8;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all .2s;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-icon-danger {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    color: #888;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-icon-danger:hover { border-color: #ff5b2b; color: #ff5b2b; }
+
+  /* === PREVIEW STYLES === */
+  .preview-wrap {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fff5ef 0%, transparent 50%),
+      radial-gradient(900px 500px at -10% 100%, #f3eee4 0%, transparent 60%),
+      var(--paper);
+    min-height: 100vh;
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Hero */
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Role cards */
+  .role-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    transition: all .35s cubic-bezier(.2,.8,.2,1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .role-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, var(--accent-soft) 100%);
+    opacity: 0;
+    transition: opacity .35s;
+  }
+  .role-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--ink);
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.15);
+  }
+  .role-card:hover::before { opacity: 1; }
+  .role-card.active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .role-card.active .role-num,
+  .role-card.active .role-courses-count { color: var(--accent); }
+
+  .role-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .role-icon-box {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .role-card.active .role-icon-box {
+    background: var(--accent);
+    color: #fff;
+  }
+  .role-courses-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Course cards */
+  .course-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: stretch;
+    transition: all .25s;
+  }
+  .course-card:hover {
+    border-color: var(--ink);
+    box-shadow: 0 10px 30px -15px rgba(0,0,0,0.12);
+  }
+
+  .metric-pill {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 20px;
+    border-radius: 10px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-pill::after {
+    content: "↗";
+    position: absolute;
+    top: 14px; right: 16px;
+    color: var(--accent);
+    font-size: 18px;
+  }
+  .metric-pill .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .metric-pill .value {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.2;
+    color: #fff;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    background: #fff;
+  }
+  .tag-level-junior  { background: #f0f7ee; border-color: #d4e8cf; color: #3d6a35; }
+  .tag-level-middle  { background: #fff7e6; border-color: #f0dfb4; color: #8a6a14; }
+  .tag-level-senior  { background: #fbe9e3; border-color: #f0c4b3; color: #a13d1c; }
+
+  /* Webinar block */
+  .webinar-card {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 18px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .3s;
+  }
+  .webinar-card:hover { transform: translateY(-3px); }
+  .webinar-card::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.15;
+    filter: blur(20px);
+  }
+
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(255,91,43,0.6);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,91,43,0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(255,91,43,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,91,43,0); }
+  }
+
+  /* Logo box in preview */
+  .logo-box {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 20px;
+    overflow: hidden;
+  }
+  .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Footer */
+  .preview-footer {
+    background: var(--ink);
+    color: var(--paper);
+    margin-top: 80px;
+    padding: 60px 40px 30px;
+    position: relative;
+  }
+  .preview-footer .big-name {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 10vw, 140px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    font-weight: 500;
+    background: linear-gradient(180deg, #f5f5f0 0%, #444 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    word-break: break-word;
+  }
+
+  /* Style theme variants */
+  .theme-corporate { --accent: #1e6fd9; --accent-soft: #e0ecfb; --gold: #1e6fd9; }
+  .theme-minimal   { --accent: #111111; --accent-soft: #efefea; --ink: #111111; --gold: #111111; }
+  .theme-warm      { --accent: #ff5b2b; --accent-soft: #ffe9df; --gold: #c9a961; }
+  .theme-tech      { --accent: #00b886; --accent-soft: #d8f5e9; --gold: #00b886; }
+  .theme-editorial { --accent: #c41e3a; --accent-soft: #fbe2e6; --gold: #c41e3a; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: #0d0d0d; padding: 4px; border-radius: 10px; }
+  .tab-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tab-btn.active { background: var(--accent); color: #fff; }
+
+  /* Mobile preview toggle */
+  @media (max-width: 1023px) {
+    .layout-grid { grid-template-columns: 1fr !important; }
+    .editor-panel { max-height: 50vh; overflow-y: auto; }
+    .metric-pill { min-width: 100%; }
+    .course-card { grid-template-columns: 1fr; }
+  }
+
+  /* Scrollbar */
+  .editor-panel::-webkit-scrollbar { width: 8px; }
+  .editor-panel::-webkit-scrollbar-track { background: #0a0a0a; }
+  .editor-panel::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+
+  .reveal { opacity: 0; transform: translateY(20px); animation: reveal .7s ease forwards; }
+  @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    border: 2px dashed var(--line);
+    border-radius: 18px;
+  }
+
+  .divider-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+</style>
+</head>
+<body>
+
+<div class="grid layout-grid" style="grid-template-columns: 440px 1fr; min-height: 100vh;">
+
+  <!-- ============== EDITOR PANEL ============== -->
+  <aside class="editor-panel overflow-y-auto" style="max-height: 100vh; position: sticky; top: 0;">
+
+    <!-- Header -->
+    <div class="editor-section" style="padding: 20px 28px;">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></div>
+          <span class="font-mono text-[10px] tracking-[0.18em] uppercase text-neutral-400">Editor / Live</span>
+        </div>
+        <span class="font-mono text-[10px] text-neutral-500">v1.0</span>
+      </div>
+      <h1 class="font-display text-2xl mt-2" style="font-weight: 500; letter-spacing: -0.02em;">
+        Конструктор <em style="color: var(--accent); font-style: italic;">портала</em>
+      </h1>
+      <p class="text-neutral-400 text-xs mt-1">Заполните поля — превью обновится мгновенно.</p>
+    </div>
+
+    <!-- Brand -->
+    <div class="editor-section">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="building-2" class="w-4 h-4 text-neutral-400"></i>
+        <span class="font-mono text-[11px] tracking-[0.15em] uppercase text-neutral-300">01 — Бренд</span>
+      </div>
+
+      <label class="editor-label">Название компании</label>
+      <input id="company-name" type="text" placeholder="ВСТАВИТЬ НАЗВАНИЕ КОМПАНИИ"
+             class="w-full px-3 py-2.5 rounded-lg text-sm" />
+
+      <label class="editor-label mt-4">Логотип (URL или эмодзи / 1 символ)</label>
+      <input id="company-logo" type="text" placeholder="ВСТАВИТЬ ЛОГОТИП — например, A или https://..."
+             class="w-full px-3 py-2.5 rounded-lg text-sm" />
+
+      <label class="editor-label mt-4">Стиль дизайна</label>
+      <select id="design-style" class="w-full px-3 py-2.5 rounded-lg text-sm">
+        <option value="warm">Тёплый редакторский (по умолчанию)</option>
+        <option value="corporate">Корпоративный синий</option>
+        <option value="minimal">Минималистичный монохром</option>
+        <option value="tech">Технологичный зелёный</option>
+        <option value="editorial">Редакторский красный</option>
+      </select>
+    </div>
+
+    <!-- Roles -->
+    <div class="editor-section">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4 text-neutral-400"></i>
+          <span class="font-mono text-[11px] tracking-[0.15em] uppercase text-neutral-300">02 — Роли сотрудников</span>
+        </div>
+      </div>
+
+      <div id="roles-container"></div>
+
+      <button onclick="addRole()" class="btn-ghost mt-3">
+        + Добавить роль
+      </button>
+    </div>
+
+    <!-- Webinars -->
+    <div class="editor-section">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="radio" class="w-4 h-4 text-neutral-400"></i>
+        <span class="font-mono text-[11px] tracking-[0.15em] uppercase text-neutral-300">03 — Внутренние вебинары</span>
+      </div>
+
+      <div id="webinars-container"></div>
+
+      <button onclick="addWebinar()" class="btn-ghost mt-3">
+        + Добавить вебинар
+      </button>
+    </div>
+
+    <!-- Footer of editor -->
+    <div class="editor-section" style="background: #0a0a0a;">
+      <p class="font-mono text-[10px] text-neutral-500 leading-relaxed">
+        // Все данные хранятся локально в памяти.<br>
+        // Обновление превью — в реальном времени.
+      </p>
+    </div>
+
+  </aside>
+
+  <!-- ============== PREVIEW ============== -->
+  <main class="preview-wrap relative" id="preview-root">
+    <div class="grain"></div>
+
+    <!-- TOP NAV -->
+    <nav class="relative px-8 lg:px-14 py-6 flex items-center justify-between border-b" style="border-color: var(--line);">
+      <div class="flex items-center gap-3">
+        <div class="logo-box" id="preview-logo">A</div>
+        <div>
+          <div class="font-display text-lg leading-tight" style="font-weight:600; letter-spacing:-0.01em;" id="preview-company-nav">Acme</div>
+          <div class="eyebrow text-[10px]">Learning Hub</div>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-8 text-sm">
+        <a class="hover:text-[var(--accent)] transition" href="#roles">Роли</a>
+        <a class="hover:text-[var(--accent)] transition" href="#webinars">Вебинары</a>
+        <a class="hover:text-[var(--accent)] transition" href="#courses">Курсы</a>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono text-[var(--muted)]">
+        <i data-lucide="user-round" class="w-4 h-4"></i>
+        <span class="hidden md:inline">Личный кабинет</span>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="relative px-8 lg:px-14 pt-14 pb-10">
+      <div class="grid lg:grid-cols-12 gap-8 items-end">
+        <div class="lg:col-span-8">
+          <div class="eyebrow mb-5 flex items-center gap-3">
+            <span class="inline-block w-8 h-px bg-current"></span>
+            Образовательный портал · 2026
+          </div>
+          <h1 class="hero-title text-[56px] sm:text-[72px] lg:text-[96px]">
+            Учиться<br>
+            <em>системно</em> —<br>
+            расти быстрее.
+          </h1>
+        </div>
+        <div class="lg:col-span-4">
+          <p class="text-base text-[var(--ink)] opacity-70 leading-relaxed max-w-sm">
+            Внутренний обучающий портал <span id="hero-company-name" class="font-display italic">компании</span>. Курсы для каждой роли, метрики влияния на бизнес, живые вебинары — всё в одном месте.
+          </p>
+          <div class="mt-6 flex items-center gap-3">
+            <div class="flex -space-x-2">
+              <div class="w-8 h-8 rounded-full bg-[var(--accent)] border-2 border-white"></div>
+              <div class="w-8 h-8 rounded-full bg-neutral-800 border-2 border-white"></div>
+              <div class="w-8 h-8 rounded-full bg-[var(--gold)] border-2 border-white"></div>
+            </div>
+            <span class="text-xs font-mono text-[var(--muted)]" id="learners-count">+ 0 ролей · 0 курсов</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROLES SECTION -->
+    <section id="roles" class="relative px-8 lg:px-14 py-12">
+      <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <div>
+          <div class="eyebrow mb-2">§ 01 / Роли</div>
+          <h2 class="font-display text-4xl lg:text-5xl" style="font-weight:500; letter-spacing:-0.03em;">
+            Выберите свою <em style="color:var(--accent); font-style:italic;">траекторию</em>
+          </h2>
+        </div>
+        <div class="font-mono text-xs text-[var(--muted)]" id="roles-counter">0 ролей</div>
+      </div>
+
+      <div id="preview-roles" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- ACTIVE ROLE DETAIL + COURSES -->
+    <section id="courses" class="relative px-8 lg:px-14 py-12">
+      <div id="preview-role-detail"></div>
+    </section>
+
+    <!-- WEBINARS -->
+    <section id="webinars" class="relative px-8 lg:px-14 py-12">
+      <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <div>
+          <div class="eyebrow mb-2">§ 03 / Live</div>
+          <h2 class="font-display text-4xl lg:text-5xl" style="font-weight:500; letter-spacing:-0.03em;">
+            Внутренние <em style="color:var(--accent); font-style:italic;">вебинары</em>
+          </h2>
+        </div>
+        <span class="font-mono text-xs text-[var(--muted)]">Новые — каждую неделю</span>
+      </div>
+      <div id="preview-webinars" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="preview-footer">
+      <div class="grid lg:grid-cols-12 gap-10">
+        <div class="lg:col-span-7">
+          <div class="big-name" id="footer-big-name">Acme.</div>
+        </div>
+        <div class="lg:col-span-5 grid sm:grid-cols-2 gap-6 self-end">
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500 mb-3">Навигация</div>
+            <ul class="space-y-1.5 text-sm text-neutral-300">
+              <li><a class="hover:text-white" href="#roles">Роли</a></li>
+              <li><a class="hover:text-white" href="#courses">Курсы</a></li>
+              <li><a class="hover:text-white" href="#webinars">Вебинары</a></li>
+              <li><a class="hover:text-white" href="#">FAQ</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500 mb-3">Контакты</div>
+            <ul class="space-y-1.5 text-sm text-neutral-300">
+              <li>learning@<span id="footer-domain">acme</span>.ru</li>
+              <li>HR-партнёры</li>
+              <li>L&D Team</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-16 pt-6 border-t border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500">
+          © 2026 <span id="footer-company-name">Acme</span> — Internal Learning Portal
+        </div>
+        <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500">
+          Сделано с заботой о людях
+        </div>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- =================== JS =================== -->
+<script>
+/* ===== STATE ===== */
+const state = {
+  company: '',
+  logo: '',
+  style: 'warm',
+  roles: [],
+  webinars: [],
+  activeRoleId: null
+};
+
+const ROLE_ICONS = ['briefcase','code-2','line-chart','megaphone','headphones','users','palette','wrench','cpu','sprout','target','layers'];
+const FORMATS = ['Онлайн', 'Офлайн', 'Гибридный', 'Самостоятельно', 'Менторинг'];
+const LEVELS = [
+  { v: 'junior', label: 'Junior' },
+  { v: 'middle', label: 'Middle' },
+  { v: 'senior', label: 'Senior' }
+];
+
+let _id = 0;
+const uid = () => `id_${++_id}_${Date.now()}`;
+
+/* ===== ROLE HELPERS ===== */
+function addRole() {
+  state.roles.push({
+    id: uid(),
+    name: '',
+    description: '',
+    icon: ROLE_ICONS[state.roles.length % ROLE_ICONS.length],
+    courses: []
+  });
+  if (!state.activeRoleId) state.activeRoleId = state.roles[state.roles.length-1].id;
+  renderEditor();
+  renderPreview();
+}
+function removeRole(id) {
+  state.roles = state.roles.filter(r => r.id !== id);
+  if (state.activeRoleId === id) state.activeRoleId = state.roles[0]?.id || null;
+  renderEditor();
+  renderPreview();
+}
+function updateRole(id, key, value) {
+  const r = state.roles.find(r => r.id === id);
+  if (r) r[key] = value;
+  renderPreview();
+}
+
+/* ===== COURSE HELPERS ===== */
+function addCourse(roleId) {
+  const r = state.roles.find(r => r.id === roleId);
+  if (!r) return;
+  r.courses.push({
+    id: uid(),
+    name: '',
+    description: '',
+    format: 'Онлайн',
+    level: 'middle',
+    metric: ''
+  });
+  renderEditor();
+  renderPreview();
+}
+function removeCourse(roleId, courseId) {
+  const r = state.roles.find(r => r.id === roleId);
+  if (!r) return;
+  r.courses = r.courses.filter(c => c.id !== courseId);
+  renderEditor();
+  renderPreview();
+}
+function updateCourse(roleId, courseId, key, value) {
+  const r = state.roles.find(r => r.id === roleId);
+  if (!r) return;
+  const c = r.courses.find(c => c.id === courseId);
+  if (c) c[key] = value;
+  renderPreview();
+}
+
+/* ===== WEBINAR HELPERS ===== */
+function addWebinar() {
+  state.webinars.push({
+    id: uid(),
+    title: '',
+    speaker: '',
+    date: '',
+    type: 'Вебинар'
+  });
+  renderEditor();
+  renderPreview();
+}
+function removeWebinar(id) {
+  state.webinars = state.webinars.filter(w => w.id !== id);
+  renderEditor();
+  renderPreview();
+}
+function updateWebinar(id, key, value) {
+  const w = state.webinars.find(w => w.id === id);
+  if (w) w[key] = value;
+  renderPreview();
+}
+
+/* ===== EDITOR RENDER ===== */
+function renderEditor() {
+  // Roles
+  const rolesEl = document.getElementById('roles-container');
+  rolesEl.innerHTML = state.roles.map((r, idx) => `
+    <div class="role-block">
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500">Роль · ${String(idx+1).padStart(2,'0')}</span>
+        <button class="btn-icon-danger" onclick="removeRole('${r.id}')" title="Удалить роль">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <label class="editor-label">Название роли</label>
+      <input type="text" placeholder="ВСТАВИТЬ РОЛЬ — например, Менеджер по продажам"
+             value="${escapeAttr(r.name)}"
+             oninput="updateRole('${r.id}','name',this.value); document.getElementById('role-counter-${r.id}').textContent = this.value || 'Без названия';"
+             class="w-full px-3 py-2 rounded-lg text-sm" />
+
+      <label class="editor-label mt-3">Описание роли</label>
+      <textarea rows="2" placeholder="Кратко опишите чем занимается человек на этой роли"
+                oninput="updateRole('${r.id}','description',this.value)"
+                class="w-full px-3 py-2 rounded-lg text-sm resize-none">${escapeAttr(r.description)}</textarea>
+
+      <div class="mt-4 pt-3 border-t border-neutral-800">
+        <div class="flex items-center justify-between mb-2">
+          <span id="role-counter-${r.id}" class="font-mono text-[10px] tracking-[0.1em] uppercase text-neutral-400">
+            ${r.name || 'Без названия'}
+          </span>
+          <span class="font-mono text-[10px] text-neutral-500">${r.courses.length} курс(ов)</span>
+        </div>
+
+        <div id="courses-container-${r.id}">
+          ${r.courses.map((c, ci) => courseTemplate(r.id, c, ci)).join('')}
+        </div>
+
+        <button onclick="addCourse('${r.id}')" class="btn-ghost mt-2" style="padding: 8px 12px;">
+          + Добавить курс
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  if (state.roles.length === 0) {
+    rolesEl.innerHTML = `<div style="border:1px dashed #2a2a2a;border-radius:12px;padding:20px;text-align:center;color:#666;font-size:12px;">
+      Пока нет ролей. Нажмите кнопку ниже, чтобы добавить первую.
+    </div>`;
+  }
+
+  // Webinars
+  const webEl = document.getElementById('webinars-container');
+  webEl.innerHTML = state.webinars.map((w, idx) => `
+    <div class="course-block">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500">${String(idx+1).padStart(2,'0')}</span>
+        <button class="btn-icon-danger" onclick="removeWebinar('${w.id}')">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+      <input type="text" placeholder="Название вебинара" value="${escapeAttr(w.title)}"
+             oninput="updateWebinar('${w.id}','title',this.value)"
+             class="w-full px-3 py-2 rounded-lg text-sm mb-2" />
+      <div class="grid grid-cols-2 gap-2">
+        <input type="text" placeholder="Спикер" value="${escapeAttr(w.speaker)}"
+               oninput="updateWebinar('${w.id}','speaker',this.value)"
+               class="w-full px-3 py-2 rounded-lg text-xs" />
+        <input type="text" placeholder="Дата (12 мая)" value="${escapeAttr(w.date)}"
+               oninput="updateWebinar('${w.id}','date',this.value)"
+               class="w-full px-3 py-2 rounded-lg text-xs" />
+      </div>
+      <select onchange="updateWebinar('${w.id}','type',this.value)"
+              class="w-full px-3 py-2 rounded-lg text-xs mt-2">
+        <option ${w.type==='Вебинар'?'selected':''}>Вебинар</option>
+        <option ${w.type==='Мастер-класс'?'selected':''}>Мастер-класс</option>
+        <option ${w.type==='Внутренний курс'?'selected':''}>Внутренний курс</option>
+        <option ${w.type==='Q&A'?'selected':''}>Q&A</option>
+      </select>
+    </div>
+  `).join('');
+
+  if (state.webinars.length === 0) {
+    webEl.innerHTML = `<div style="border:1px dashed #2a2a2a;border-radius:12px;padding:20px;text-align:center;color:#666;font-size:12px;">
+      Добавьте вебинары и внутренние курсы, которые проходят регулярно.
+    </div>`;
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function courseTemplate(roleId, c, idx) {
+  return `
+    <div class="course-block">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-500">Курс · ${String(idx+1).padStart(2,'0')}</span>
+        <button class="btn-icon-danger" onclick="removeCourse('${roleId}','${c.id}')">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <input type="text" placeholder="ВСТАВИТЬ НАЗВАНИЕ КУРСА"
+             value="${escapeAttr(c.name)}"
+             oninput="updateCourse('${roleId}','${c.id}','name',this.value)"
+             class="w-full px-3 py-2 rounded-lg text-sm mb-2" />
+
+      <textarea rows="2" placeholder="ВСТАВИТЬ ОПИСАНИЕ"
+                oninput="updateCourse('${roleId}','${c.id}','description',this.value)"
+                class="w-full px-3 py-2 rounded-lg text-xs resize-none mb-2">${escapeAttr(c.description)}</textarea>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="editor-label" style="font-size:9px;">Формат</label>
+          <select onchange="updateCourse('${roleId}','${c.id}','format',this.value)"
+                  class="w-full px-2 py-1.5 rounded-md text-xs">
+            ${FORMATS.map(f => `<option ${c.format===f?'selected':''}>${f}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="editor-label" style="font-size:9px;">Уровень</label>
+          <select onchange="updateCourse('${roleId}','${c.id}','level',this.value)"
+                  class="w-full px-2 py-1.5 rounded-md text-xs">
+            ${LEVELS.map(l => `<option value="${l.v}" ${c.level===l.v?'selected':''}>${l.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <label class="editor-label mt-2" style="font-size:9px;">Метрика влияния</label>
+      <input type="text" placeholder="ВСТАВИТЬ МЕТРИКУ — например, Конверсия в продажу +15%"
+             value="${escapeAttr(c.metric)}"
+             oninput="updateCourse('${roleId}','${c.id}','metric',this.value)"
+             class="w-full px-3 py-2 rounded-lg text-xs" />
+    </div>
+  `;
+}
+
+function escapeAttr(s) {
+  return (s || '').toString()
+    .replaceAll('&','&amp;').replaceAll('"','&quot;')
+    .replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+/* ===== PREVIEW RENDER ===== */
+function renderPreview() {
+  // Theme
+  document.getElementById('preview-root').className = `preview-wrap relative theme-${state.style}`;
+
+  // Brand
+  const company = state.company || 'Название компании';
+  document.getElementById('preview-company-nav').textContent = company;
+  document.getElementById('hero-company-name').textContent = company;
+  document.getElementById('footer-company-name').textContent = company;
+  document.getElementById('footer-big-name').textContent = company + '.';
+  document.getElementById('footer-domain').textContent = company.toLowerCase().replace(/[^a-zа-я0-9]/gi,'').slice(0,12) || 'company';
+
+  // Logo
+  const logoEl = document.getElementById('preview-logo');
+  const logo = (state.logo || '').trim();
+  if (logo.startsWith('http')) {
+    logoEl.innerHTML = `<img src="${escapeAttr(logo)}" alt="logo" onerror="this.parentElement.innerHTML='${(company[0]||'A').toUpperCase()}'" />`;
+  } else if (logo.length > 0) {
+    logoEl.textContent = logo.slice(0, 2);
+  } else {
+    logoEl.textContent = (company[0] || 'A').toUpperCase();
+  }
+
+  // Counter
+  const totalCourses = state.roles.reduce((s,r) => s + r.courses.length, 0);
+  document.getElementById('learners-count').textContent = `${state.roles.length} ролей · ${totalCourses} курсов`;
+  document.getElementById('roles-counter').textContent = `${String(state.roles.length).padStart(2,'0')} / ${String(state.roles.length).padStart(2,'0')} ролей`;
+
+  // Roles
+  const rolesPrev = document.getElementById('preview-roles');
+  if (state.roles.length === 0) {
+    rolesPrev.innerHTML = `<div class="empty-state col-span-full">
+      <i data-lucide="users-round" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+      <p class="font-display text-xl mb-1">Пока ни одной роли</p>
+      <p class="text-sm">Добавьте первую роль в редакторе слева →</p>
+    </div>`;
+  } else {
+    rolesPrev.innerHTML = state.roles.map((r, idx) => {
+      const isActive = state.activeRoleId === r.id;
+      return `
+        <div class="role-card reveal ${isActive ? 'active' : ''}" style="animation-delay:${idx*60}ms" onclick="selectRole('${r.id}')">
+          <div class="flex items-start justify-between mb-5">
+            <div class="role-icon-box">
+              <i data-lucide="${r.icon}" class="w-5 h-5"></i>
+            </div>
+            <span class="role-num">№ ${String(idx+1).padStart(2,'0')}</span>
+          </div>
+          <h3 class="font-display text-2xl mb-2" style="font-weight:500;letter-spacing:-0.02em;line-height:1.1;">
+            ${escapeAttr(r.name) || '<span style="opacity:0.4;">Без названия</span>'}
+          </h3>
+          <p class="text-sm leading-relaxed opacity-70 mb-5 min-h-[40px]">
+            ${escapeAttr(r.description) || 'Описание роли появится здесь...'}
+          </p>
+          <div class="flex items-center justify-between pt-4 border-t" style="border-color: currentColor; border-opacity: 0.1;">
+            <span class="role-courses-count">${r.courses.length} курс(ов)</span>
+            <span class="font-mono text-xs flex items-center gap-1">
+              ${isActive ? 'Открыто' : 'Открыть'}
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Active role detail
+  renderActiveRole();
+
+  // Webinars
+  renderWebinars();
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderActiveRole() {
+  const detail = document.getElementById('preview-role-detail');
+  const role = state.roles.find(r => r.id === state.activeRoleId);
+  if (!role) {
+    detail.innerHTML = '';
+    return;
+  }
+  const idx = state.roles.indexOf(role);
+
+  detail.innerHTML = `
+    <div class="grid lg:grid-cols-12 gap-10 mb-10 items-start">
+      <div class="lg:col-span-5">
+        <div class="eyebrow mb-2">§ 02 / Курсы роли</div>
+        <div class="flex items-center gap-3 mb-5">
+          <div class="role-icon-box" style="width:56px;height:56px;border-radius:14px;">
+            <i data-lucide="${role.icon}" class="w-6 h-6"></i>
+          </div>
+          <span class="font-mono text-xs text-[var(--muted)]">Роль № ${String(idx+1).padStart(2,'0')}</span>
+        </div>
+        <h2 class="font-display text-4xl lg:text-5xl mb-4" style="font-weight:500;letter-spacing:-0.03em;">
+          ${escapeAttr(role.name) || 'Без названия'}
+        </h2>
+        <p class="text-base leading-relaxed opacity-75 max-w-md">
+          ${escapeAttr(role.description) || 'Здесь появится описание роли — расскажите, чем занимается человек, какие у него зоны ответственности и как курсы помогают ему расти.'}
+        </p>
+        <div class="mt-6 flex flex-wrap gap-2">
+          <span class="tag"><i data-lucide="graduation-cap" class="w-3 h-3"></i> ${role.courses.length} курс(ов)</span>
+          <span class="tag"><i data-lucide="trending-up" class="w-3 h-3"></i> Влияние на бизнес</span>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 space-y-4">
+        ${role.courses.length === 0 ?
+          `<div class="empty-state">
+            <i data-lucide="book-open" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+            <p class="font-display text-xl mb-1">У этой роли пока нет курсов</p>
+            <p class="text-sm">Добавьте первый курс в редакторе слева</p>
+          </div>` :
+          role.courses.map((c, ci) => courseCardPreview(c, ci)).join('')
+        }
+      </div>
+    </div>
+  `;
+}
+
+function courseCardPreview(c, ci) {
+  const levelLabel = LEVELS.find(l => l.v === c.level)?.label || 'Middle';
+  return `
+    <div class="course-card reveal" style="animation-delay:${ci*80}ms">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap mb-3">
+          <span class="font-mono text-[10px] text-[var(--muted)]">№ ${String(ci+1).padStart(2,'0')}</span>
+          <span class="tag"><i data-lucide="play-circle" class="w-3 h-3"></i> ${escapeAttr(c.format)}</span>
+          <span class="tag tag-level-${c.level}"><i data-lucide="signal" class="w-3 h-3"></i> ${levelLabel}</span>
+        </div>
+        <h3 class="font-display text-xl lg:text-2xl mb-2" style="font-weight:500;letter-spacing:-0.02em;line-height:1.15;">
+          ${escapeAttr(c.name) || '<span style="opacity:0.4;">Без названия</span>'}
+        </h3>
+        <p class="text-sm opacity-70 leading-relaxed">
+          ${escapeAttr(c.description) || 'Краткое описание курса — что внутри, чему научит, сколько занимает.'}
+        </p>
+      </div>
+
+      <div class="metric-pill">
+        <span class="label">Метрика влияния</span>
+        <span class="value">${escapeAttr(c.metric) || 'Укажите метрику'}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderWebinars() {
+  const wEl = document.getElementById('preview-webinars');
+  if (state.webinars.length === 0) {
+    wEl.innerHTML = `<div class="empty-state col-span-full">
+      <i data-lucide="radio" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+      <p class="font-display text-xl mb-1">Пока ни одного вебинара</p>
+      <p class="text-sm">Добавьте предстоящие вебинары в редакторе</p>
+    </div>`;
+    return;
+  }
+  wEl.innerHTML = state.webinars.map((w, i) => `
+    <div class="webinar-card reveal" style="animation-delay:${i*70}ms">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-2">
+          <span class="live-dot"></span>
+          <span class="font-mono text-[10px] tracking-[0.15em] uppercase text-neutral-400">${escapeAttr(w.type) || 'Вебинар'}</span>
+        </div>
+        <span class="font-mono text-xs text-neutral-400">${escapeAttr(w.date) || '—'}</span>
+      </div>
+      <h3 class="font-display text-xl lg:text-2xl mb-4" style="font-weight:500;letter-spacing:-0.02em;line-height:1.2;">
+        ${escapeAttr(w.title) || '<span style="opacity:0.4;">Без названия</span>'}
+      </h3>
+      <div class="flex items-center gap-2 pt-4 border-t border-neutral-800">
+        <i data-lucide="user-round" class="w-3.5 h-3.5 text-neutral-500"></i>
+        <span class="text-xs text-neutral-400">${escapeAttr(w.speaker) || 'Спикер не указан'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectRole(id) {
+  state.activeRoleId = id;
+  renderPreview();
+  document.getElementById('courses').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ===== INPUT BINDINGS ===== */
+document.getElementById('company-name').addEventListener('input', e => {
+  state.company = e.target.value;
+  renderPreview();
+});
+document.getElementById('company-logo').addEventListener('input', e => {
+  state.logo = e.target.value;
+  renderPreview();
+});
+document.getElementById('design-style').addEventListener('change', e => {
+  state.style = e.target.value;
+  renderPreview();
+});
+
+/* ===== INITIAL DEMO DATA ===== */
+function bootstrap() {
+  state.company = 'Acme';
+  state.logo = 'A';
+  state.roles = [
+    {
+      id: uid(),
+      name: 'Менеджер по продажам',
+      description: 'Работает с клиентами, проводит сделки и развивает базу контактов.',
+      icon: 'briefcase',
+      courses: [
+        {
+          id: uid(),
+          name: 'Воронка продаж 2.0',
+          description: 'Системный подход к работе с клиентами на всех этапах сделки.',
+          format: 'Онлайн',
+          level: 'middle',
+          metric: 'Конверсия в продажу +15%'
+        },
+        {
+          id: uid(),
+          name: 'Переговоры под давлением',
+          description: 'Практика сложных переговорных ситуаций с обратной связью.',
+          format: 'Офлайн',
+          level: 'senior',
+          metric: 'Средний чек +20%'
+        }
+      ]
+    },
+    {
+      id: uid(),
+      name: 'Product-инженер',
+      description: 'Разрабатывает продукт, объединяя инженерные навыки и продуктовое мышление.',
+      icon: 'code-2',
+      courses: [
+        {
+          id: uid(),
+          name: 'AI-агенты на практике',
+          description: 'Архитектура multi-agent систем, n8n, LLM-интеграции.',
+          format: 'Гибридный',
+          level: 'middle',
+          metric: 'Time-to-market −30%'
+        }
+      ]
+    },
+    {
+      id: uid(),
+      name: 'HR-партнёр',
+      description: 'Сопровождает сотрудников и команды, отвечает за их рост и развитие.',
+      icon: 'users',
+      courses: []
+    }
+  ];
+  state.activeRoleId = state.roles[0].id;
+  state.webinars = [
+    { id: uid(), title: 'Как работают AI-агенты внутри компании', speaker: 'Анна Соколова', date: '14 мая', type: 'Вебинар' },
+    { id: uid(), title: 'Q&A с CTO: технологии 2026', speaker: 'Дмитрий Орлов', date: '21 мая', type: 'Q&A' }
+  ];
+
+  document.getElementById('company-name').value = state.company;
+  document.getElementById('company-logo').value = state.logo;
+}
+
+bootstrap();
+renderEditor();
+renderPreview();
+</script>
+
+</body>
+</html>
